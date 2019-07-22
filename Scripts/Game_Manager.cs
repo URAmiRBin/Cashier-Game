@@ -9,12 +9,17 @@ public enum Food { Hamburger, Number9, Cheese, Dip };
 
 public class Game_Manager : MonoBehaviour
 {
+    // Time Variables
+    private float           next_action_time = 0.0f;
+    private float           period = 3.0f;
+    // UI Variables
     public  Text            ui_customers_text;
     public  Text            ui_inqueue_text;
     public  InputField      inputField;
+    public  Text            ui_score;
+    // Scripting Variables
     private int             inqueue_number;
-    private float           next_action_time = 0.0f;
-    private float           period = 3.0f;
+    private int             score;
     private List<string>    customer_list = new List<string>();
     private List<Customer>  customers= new List<Customer>();
     public  int             id = 1;
@@ -22,43 +27,54 @@ public class Game_Manager : MonoBehaviour
     void Start()
     {
         inqueue_number = 0;
-        ui_inqueue_text.text = "0";
+        score = 0;
+        ui_inqueue_text.text = "Customers wating : 0";
         ui_customers_text.text = "";
+        ui_score.text = "0 $";
+        // This is for InputField Listener
         var se= new InputField.SubmitEvent();
-        se.AddListener(fuck);
+        se.AddListener(SubmitField);
         inputField.onEndEdit = se;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        // Run this every 3 seconds
         if (Time.time > next_action_time){
             next_action_time += period;
             Customer new_customer = new Customer(id++);
             inqueue_number += 1;
-            ui_inqueue_text.text = inqueue_number.ToString();
+            ui_inqueue_text.text = "Customers wating : " + inqueue_number.ToString();
             customers.Add(new_customer);
             ui_customers_text.text = generate_customer_list_text(update_customers_list(new_customer, true));
         }
 
+        // Checks Game Over State
         if (inqueue_number > 3){
             SceneManager.LoadScene("game_over_scene");
         }
     }
 
-    private void fuck(string arg0){
-        if( Int32.Parse(arg0) == customers[0].get_price()){
-            ui_customers_text.text = generate_customer_list_text(update_customers_list(null, false));        
+    // Runs when Inputfield Event Listener is triggred
+    private void SubmitField(string arg0){
+        // Checks if given number is correct
+        if ( Int32.Parse(arg0) == customers[0].get_price()){
+            ui_customers_text.text = generate_customer_list_text(update_customers_list(null, false));
+            score += 1;
         }
         else {
             Debug.Log("you're wrong fucker");
+            score -= 1;
         }
+        ui_score.text = score.ToString() + " $";
     }
 
+    // Updates Customers List: THIS IS UI TEST
     private List<string> update_customers_list(Customer customer, bool isnew){
         List<string> temp = customer_list;
         if(isnew){
-            temp.Add(customer.get_id().ToString() + ":>" + customer.get_order().ToString());
+            temp.Add(customer.CustomerId.ToString() + ":>" + customer.get_order().ToString());
         }
         else {
             customers.RemoveAt(0);
@@ -69,6 +85,7 @@ public class Game_Manager : MonoBehaviour
         return temp;
     }
 
+    // Generates a string from customers list : THIS IS UI TEST
     private string generate_customer_list_text(List<string> customer_list){
         return string.Join( "\n",customer_list);
     }
@@ -78,20 +95,32 @@ public class Game_Manager : MonoBehaviour
 
 
 public class Customer{
-    public int customer_id;
+    // Fields
+    private int _customerId;
+    private List<Food> _order;
+    
+    // Properties
+    public int CustomerId 
+    {
+        get
+        {
+            return _customerId;
+        }
+    }
 
-    private List<Food> Order = new List<Food>();
+    // Constructor
     public Customer(int id){
-        customer_id = id;
-        Order = generate_order();
+        _customerId = id;
+        _order = generate_order();
     }
     
-    public int get_id() { return this.customer_id; }
+    // Fucntions
     public string get_order() { 
-        List<string> stringList = this.Order.ConvertAll(Food => Food.ToString());
+        List<string> stringList = _order.ConvertAll(Food => Food.ToString());
         string res = string.Join(",", stringList);
         return res; 
     }
+
     private List<Food> generate_order(){
         System.Random r = new System.Random();
         int     numbers = r.Next(1 , 4);
@@ -105,7 +134,7 @@ public class Customer{
 
     public int get_price(){
         int sum = 0;
-        foreach(Food food in Order){
+        foreach(Food food in _order){
             if ( food == Food.Dip ){
                 sum += 1;
             }
