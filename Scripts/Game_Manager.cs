@@ -17,6 +17,7 @@ public class Game_Manager : MonoBehaviour
     public  Text            ui_inqueue_text;
     public  InputField      inputField;
     public  Text            ui_score;
+    public  Text            ui_input_text;
     // Scripting Variables
     private int             inqueue_number;
     private int             score;
@@ -28,6 +29,7 @@ public class Game_Manager : MonoBehaviour
     {
         inqueue_number = 0;
         score = 0;
+        ui_input_text.text = "";
         ui_inqueue_text.text = "Customers wating : 0";
         ui_customers_text.text = "";
         ui_score.text = "0 $";
@@ -88,6 +90,42 @@ public class Game_Manager : MonoBehaviour
     // Generates a string from customers list : THIS IS UI TEST
     private string generate_customer_list_text(List<string> customer_list){
         return string.Join( "\n",customer_list);
+    }
+
+
+    public void keyboard1(){
+        ui_input_text.text = ui_input_text.text + "1";
+    }
+    public void keyboard2(){
+        ui_input_text.text = ui_input_text.text + "2";
+    }
+    public void keyboard3(){
+        ui_input_text.text = ui_input_text.text + "3";
+    }
+    public void keyboard4(){
+        ui_input_text.text = ui_input_text.text + "4";
+    }
+    public void keyboard5(){
+        ui_input_text.text = ui_input_text.text + "5";
+    }
+    public void keyboard6(){
+        ui_input_text.text = ui_input_text.text + "6";
+    }
+    public void keyboard7(){
+        ui_input_text.text = ui_input_text.text + "7";
+    }
+    public void keyboard8(){
+        ui_input_text.text = ui_input_text.text + "8";
+    }
+    public void keyboard9(){
+        ui_input_text.text = ui_input_text.text + "9";
+    }
+    public void keyboard0(){
+        ui_input_text.text = ui_input_text.text + "0";
+    }
+    public void keyboarde(){
+        SubmitField(ui_input_text.text);
+        ui_input_text.text = "";
     }
 }
 
