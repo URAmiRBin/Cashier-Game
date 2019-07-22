@@ -15,7 +15,6 @@ public class Game_Manager : MonoBehaviour
     // UI Variables
     public  Text            ui_customers_text;
     public  Text            ui_inqueue_text;
-    public  InputField      inputField;
     public  Text            ui_score;
     public  Text            ui_input_text;
     // Scripting Variables
@@ -33,10 +32,6 @@ public class Game_Manager : MonoBehaviour
         ui_inqueue_text.text = "Customers wating : 0";
         ui_customers_text.text = "";
         ui_score.text = "0 $";
-        // This is for InputField Listener
-        var se= new InputField.SubmitEvent();
-        se.AddListener(SubmitField);
-        inputField.onEndEdit = se;
     }
 
     // Update is called once per frame
@@ -45,6 +40,8 @@ public class Game_Manager : MonoBehaviour
         // Run this every 3 seconds
         if (Time.time > next_action_time){
             next_action_time += period;
+            System.Random r = new System.Random();
+            period = (float)(r.NextDouble() * (6 - 3) + 3);
             Customer new_customer = new Customer(id++);
             inqueue_number += 1;
             ui_inqueue_text.text = "Customers wating : " + inqueue_number.ToString();
@@ -62,12 +59,12 @@ public class Game_Manager : MonoBehaviour
     private void SubmitField(string arg0){
         // Checks if given number is correct
         if ( Int32.Parse(arg0) == customers[0].get_price()){
+            score += customers[0].get_price();
             ui_customers_text.text = generate_customer_list_text(update_customers_list(null, false));
-            score += 1;
         }
         else {
             Debug.Log("you're wrong fucker");
-            score -= 1;
+            score -= 5;
         }
         ui_score.text = score.ToString() + " $";
     }
