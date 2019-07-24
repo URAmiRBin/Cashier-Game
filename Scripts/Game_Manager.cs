@@ -6,7 +6,6 @@ using System;
 using UnityEngine.SceneManagement;
 
 public enum Food { Apple, Cheese, Cookie, Bacon };
-
 public class Game_Manager : MonoBehaviour
 {
     // Time Variables
@@ -23,13 +22,9 @@ public class Game_Manager : MonoBehaviour
     private int             score;
     private List<string>    customer_list = new List<string>();
     private List<Customer>  customers= new List<Customer>();
-    public  int             id = 1;
-    public  GameObject      cv, ov;
     // Start is called before the first frame update
     void Start()
     {
-        cv = sprite_whole.transform.GetChild(0).gameObject;
-        ov = cv.transform.GetChild(0).gameObject;
         inqueue_number = 0;
         score = 0;
         ui_input_text.text = "";
@@ -46,12 +41,12 @@ public class Game_Manager : MonoBehaviour
             next_action_time += period;
             System.Random r = new System.Random();
             period = (float)(r.NextDouble() * (6 - 3) + 3);
-            Customer new_customer = new Customer(id++);
+            Customer new_customer = new Customer(inqueue_number,sprite_whole);
             inqueue_number += 1;
             ui_inqueue_text.text = "Customers wating : " + inqueue_number.ToString();
             customers.Add(new_customer);
             ui_customers_text.text = generate_customer_list_text(update_customers_list(new_customer, true));
-            new_customer.ui_order(sprite_whole , inqueue_number - 1);
+            new_customer.ui_order();
         }
 
         // Checks Game Over State
@@ -67,7 +62,10 @@ public class Game_Manager : MonoBehaviour
         // Checks if given number is correct
         if ( Int32.Parse(arg0) == customers[0].get_price()){
             score += customers[0].get_price();
+            customers[0].ui_remove();
+            ui_update();
             ui_customers_text.text = generate_customer_list_text(update_customers_list(null, false));
+            
         }
         else {
             Debug.Log("you're wrong fucker");
@@ -76,6 +74,18 @@ public class Game_Manager : MonoBehaviour
         ui_score.text = score.ToString() + " $";
     }
 
+    private void ui_update(){
+        foreach(Customer customer in customers){
+            if(customer.CustomerId != 0){
+                customer.setId(customer.CustomerId - 1);
+                customer.ui_remove();
+                customer.update_cv(sprite_whole);
+                customer.ui_order();
+            }
+            
+        }
+        
+    }
     // Updates Customers List: THIS IS UI TEST
     private List<string> update_customers_list(Customer customer, bool isnew){
         List<string> temp = customer_list;
@@ -140,7 +150,8 @@ public class Customer{
     // Fields
     private int _customerId;
     private List<Food> _order;
-    
+    private GameObject _customerSprite;
+    private List<GameObject> _orderSprite;
     // Properties
     public int CustomerId 
     {
@@ -150,10 +161,19 @@ public class Customer{
         }
     }
 
+    public void setId(int newid){
+        _customerId = newid;
+    }
+
     // Constructor
-    public Customer(int id){
+    public Customer(int id, GameObject spritewhole){
         _customerId = id;
         _order = generate_order();
+        _customerSprite = spritewhole.transform.GetChild(id).gameObject;
+        _orderSprite = new List<GameObject>();
+        for( int i = 0; i < _order.Count; i++){
+            _orderSprite.Add(_customerSprite.transform.GetChild(i).gameObject);            
+        } 
     }
     
     // Fucntions
@@ -163,16 +183,23 @@ public class Customer{
         return res; 
     }
 
-    public void ui_order(GameObject spritewhole, int number) {
-        List<string> stringList = _order.ConvertAll(Food => Food.ToString());
-        var c = spritewhole.transform.GetChild(number);
-        List<GameObject> o = new List<GameObject>();
-        Debug.Log(stringList.Count);
-        for( int i = 0; i < stringList.Count; i++){
-            o.Add(c.transform.GetChild(i).gameObject);            
+    public void update_cv(GameObject spritewhole){
+        _customerSprite = spritewhole.transform.GetChild(_customerId).gameObject;
+        _orderSprite = new List<GameObject>();
+        for( int i = 0; i < _order.Count; i++){
+            _orderSprite.Add(_customerSprite.transform.GetChild(i).gameObject);            
+        }
+    }
+
+    public void ui_order() {
+        for( int i = 0; i < _order.Count; i++){
+            _orderSprite[i].GetComponent<sprite_spawner>().LoadSprite(_order[i], (float)_customerId, (float)i);
         } 
-        for( int i = 0; i < stringList.Count; i++){
-            o[i].GetComponent<sprite_spawner>().LoadSprite(stringList[i], (float)number, (float)i);
+    }
+
+    public void ui_remove(){
+        for( int i = 0; i < _order.Count; i++){
+            _orderSprite[i].GetComponent<sprite_spawner>().DeloadSprite();
         } 
     }
 

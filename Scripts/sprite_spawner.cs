@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class sprite_spawner : MonoBehaviour
 {
     private Sprite appleSprite, cheeseSprite, cookieSprite, baconSprite;
@@ -19,21 +20,26 @@ public class sprite_spawner : MonoBehaviour
         baconSprite = Resources.Load<Sprite> ("Food/Bacon");
     }
 
-    public void LoadSprite(string food, float queue_number, float order_number)
+    public void LoadSprite(Food food, float queue_number, float order_number)
     {
         transform.position = new Vector3(order_number, queue_number, 1.0f);
-        if (food == "Apple")
+        if (food == Food.Apple)
         {
             sr.sprite = appleSprite;
         }
-        else if (food == "Cheese") {
+        else if (food == Food.Cheese) {
             sr.sprite = cheeseSprite;
         }
-        else if (food == "Cookie") {
+        else if (food == Food.Cookie) {
             sr.sprite = cookieSprite;
         }
-        else if (food == "Bacon") {
+        else if (food == Food.Bacon) {
             sr.sprite = baconSprite;
         }
+        sr.enabled = true;
+    }
+
+    public void DeloadSprite(){
+        sr.enabled = false;
     }
 }
