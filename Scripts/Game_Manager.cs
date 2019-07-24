@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System;
 using UnityEngine.SceneManagement;
 
-public enum Food { Hamburger, Number9, Cheese, Dip };
+public enum Food { Apple, Cheese, Cookie, Bacon };
 
 public class Game_Manager : MonoBehaviour
 {
@@ -17,15 +17,19 @@ public class Game_Manager : MonoBehaviour
     public  Text            ui_inqueue_text;
     public  Text            ui_score;
     public  Text            ui_input_text;
+    public  GameObject      sprite_whole;
     // Scripting Variables
     private int             inqueue_number;
     private int             score;
     private List<string>    customer_list = new List<string>();
     private List<Customer>  customers= new List<Customer>();
     public  int             id = 1;
+    public  GameObject      cv, ov;
     // Start is called before the first frame update
     void Start()
     {
+        cv = sprite_whole.transform.GetChild(0).gameObject;
+        ov = cv.transform.GetChild(0).gameObject;
         inqueue_number = 0;
         score = 0;
         ui_input_text.text = "";
@@ -47,6 +51,7 @@ public class Game_Manager : MonoBehaviour
             ui_inqueue_text.text = "Customers wating : " + inqueue_number.ToString();
             customers.Add(new_customer);
             ui_customers_text.text = generate_customer_list_text(update_customers_list(new_customer, true));
+            new_customer.ui_order(sprite_whole , inqueue_number - 1);
         }
 
         // Checks Game Over State
@@ -54,6 +59,8 @@ public class Game_Manager : MonoBehaviour
             SceneManager.LoadScene("game_over_scene");
         }
     }
+
+    
 
     // Runs when Inputfield Event Listener is triggred
     private void SubmitField(string arg0){
@@ -156,6 +163,19 @@ public class Customer{
         return res; 
     }
 
+    public void ui_order(GameObject spritewhole, int number) {
+        List<string> stringList = _order.ConvertAll(Food => Food.ToString());
+        var c = spritewhole.transform.GetChild(number);
+        List<GameObject> o = new List<GameObject>();
+        Debug.Log(stringList.Count);
+        for( int i = 0; i < stringList.Count; i++){
+            o.Add(c.transform.GetChild(i).gameObject);            
+        } 
+        for( int i = 0; i < stringList.Count; i++){
+            o[i].GetComponent<sprite_spawner>().LoadSprite(stringList[i], (float)number, (float)i);
+        } 
+    }
+
     private List<Food> generate_order(){
         System.Random r = new System.Random();
         int     numbers = r.Next(1 , 4);
@@ -170,16 +190,16 @@ public class Customer{
     public int get_price(){
         int sum = 0;
         foreach(Food food in _order){
-            if ( food == Food.Dip ){
+            if ( food == Food.Apple ){
                 sum += 1;
             }
             else if ( food == Food.Cheese ){
                 sum += 2;
             }
-            else if ( food == Food.Hamburger ){
+            else if ( food == Food.Cookie ){
                 sum += 3;                
             }
-            else if ( food == Food.Number9 ){
+            else if ( food == Food.Bacon ){
                 sum += 4;
             }
         }
